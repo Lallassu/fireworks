@@ -1,21 +1,12 @@
-- github project 
-- split into html + js
-- cube "world"
-    -> mitten kub och många små runtom i "dimman".
-    -> fogExp
-
-- pointlight for shotup (blink as leave ground)
-
-- mortars on ground
-
-- flash of screen on explode.
-
 - vr support
+- fixa mortar + placeringar 
+    -> fixa texture
 
-
-- smoke particles
-- blinking particles
-- different types
-
-
-
+- Fireworks.js -> fireworks specifications
+    - färdiga effekter + shells som egna funktioner som man kan kombinera.
+     -> Smoke
+     -> Sparks
+     -> random create function 
+     -> random effect function 
+     -> random explode function
+        etc...

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - buffer geometry custom attributes - particles</title>
+		<title>Fireworks VR</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	</head>
@@ -53,6 +53,8 @@
             var invMaxFps = 1/60;
             var frameDelta = 0;
             var clock = new THREE.Clock();
+            var hlight = 0;
+            var plight = 0;
 
 
 			init();
@@ -70,13 +72,10 @@
                 scene = new THREE.Scene();
 
                 uniforms = {
-
                     pointTexture: { value: new THREE.TextureLoader().load( "textures/sprites/spark1.png" ) }
-
                 };
 
                 var shaderMaterial = new THREE.ShaderMaterial( {
-
                     uniforms: uniforms,
                     vertexShader: document.getElementById( 'vertexshader' ).textContent,
                     fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
@@ -85,14 +84,10 @@
                     depthTest: false,
                     transparent: true,
                     vertexColors: true
-
                 } );
 
 
-                var radius = 200;
-
 				geometry = new THREE.BufferGeometry();
-
 				var positions = [];
 				var colors = [];
 				var sizes = [];
@@ -116,12 +111,23 @@
 
 				scene.add( particleSystem );
 
-                var planegeo = new THREE.PlaneGeometry( 5000, 5000, 1 );
+                var cubegeo = new THREE.CubeGeometry( 500, 900, 5000 );
                 var matgeo = new THREE.MeshPhongMaterial( {color: 0x333333} );
-                var plane = new THREE.Mesh(planegeo, matgeo);
-                plane.rotation.x= -Math.PI/2;
-                plane.position.y = 0;
-                scene.add( plane );
+                var cube = new THREE.Mesh(cubegeo, matgeo);
+                cube.rotation.x= -Math.PI/2;
+                cube.position.y = -2500;
+                scene.add( cube );
+
+                for(var i = 0; i < 50; i++) {
+                    var size = 100+Math.random()*300;
+                    var cubegeo = new THREE.CubeGeometry( size, size, 3500 );
+                    var cube = new THREE.Mesh(cubegeo, matgeo);
+                    cube.rotation.x= -Math.PI/2;
+                    cube.position.x = -6000+Math.random()*12000;
+                    cube.position.z = -6000+Math.random()*12000;
+                    cube.position.y = -3000-Math.random()*1000;
+                    scene.add( cube );
+                }
                 
                // var cubegeo = new THREE.MeshPhongMaterial( {color: 0x555588} );
                // var cube = new THREE.Mesh(new THREE.CylinderGeometry(100, 100, 100, 100), cubegeo);
@@ -132,13 +138,22 @@
                 var cylmat = new THREE.MeshPhongMaterial( {map: texture });
                 var cylgeo = new THREE.CylinderGeometry(10, 10, 30, 32, 32, true);
                 var cyl = new THREE.Mesh(cylgeo, cylmat);
-                cyl.position.y = 50;
+                cyl.position.y = 15;
                 scene.add(cyl);
 
-                var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+                var light = new THREE.AmbientLight( 0x404040 );
                 scene.add( light );
-                light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
-                scene.add( light );
+                hlight = new THREE.HemisphereLight( 0xAA6677, 0xAACC22, 0.5);
+                console.log(hlight);
+                scene.add( hlight );
+
+          plight = new THREE.PointLight( 0x332200, 3, 100 );
+          plight.position.set( 0, 15, 0 );
+          scene.add( plight );
+
+                //scene.fog = new THREE.FogExp2( 0x333333, 0.0025 );
+                scene.background = new THREE.Color( 0x000000);
+                scene.fog = new THREE.FogExp2( 0x000000, 0.000185 );
 
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -155,15 +170,39 @@
 				controls.maxDistance = 5000;
 				controls.enablePan = true;
 
-				//
-
 				window.addEventListener( 'resize', onWindowResize, false );
                 window.addEventListener('click', onClick, true);
 
 			}
             function onClick() {
-                 sh.Play("up1", 1.0);
+                 // Smoke
+                 for (var i = 0; i < 100; i++) {
+                            pp.New({
+                               effect: function(particle, dt, time) {
+                                    particle.vz += Math.sin(time*Math.random())/50;
+                                    particle.vx += Math.sin(time*Math.random())/50;
+                               },
+                               x: 10-Math.random()*20,
+                               y: 10+Math.random()*5,
+                               z: 10-Math.random()*20,
+                               mass: 0.002,
+                               gravity: Math.random(),
+                               size: 20+Math.random()*100,
+                               h: 0.5,
+                               s: 0.5,
+                               l: 0.5,
+                               r: 0.2,
+                               g: 0.2,
+                               b: 0.2,
+                               life: Math.random()*5,
+                               decay: 20+Math.random()*20,
+                            });
+                }
                  pp.New({
+                        onCreate: function(particle) {
+                            sh.Play("up1", 1.0);
+                            plight.intensity = 20.0;
+                         },
                         effect: function(particle, dt, time) {
                             // Spin shell
                             particle.x += Math.sin(dt*time)*2;
@@ -200,6 +239,8 @@
                         },
                         action: function(particle, dt, time) {
                             sh.Play("boom1", 1.0, false);
+                            hlight.intensity = 1.0;
+                            hlight.color.r = 1.0;
                             for (var i = 0; i < 300; i++) {
                                 pp.New({
                                    x: particle.x,
@@ -264,7 +305,7 @@
                                    h: 0.9,
                                    s: Math.random(),
                                    l: 0.5,
-                                   life: 0.1+Math.random()*3,
+                                   life: 0.1+Math.random()*3.5,
                                    decay: Math.random()*100,
                                 });
                             }
@@ -291,18 +332,27 @@
 
                 while(frameDelta >= invMaxFps) {
 
+                      if(plight.intensity > 0) {
+                        plight.intensity -= 1;
+                      }
+
+                      if(hlight.intensity > 0.5) {
+                        hlight.intensity -= 0.1;
+                      } else {
+                        hlight.color.r = 0.66666;
+                        hlight.color.g = 0.4;
+                        hlight.color.b = 0.46666;
+                      }
+
 				     var sizes = geometry.attributes.size.array;
 				     var colors = geometry.attributes.color.array;
 				     var positions = geometry.attributes.position.array;
-                     
-                     var alive = 0;
-            
+
 				     for ( var i = 0; i < particles*3; i +=3 ) {
                         var pos = i/3 | 0;
                         if (!pp.particles[pos].alive) {
                             continue;
                         }
-                        alive++;
 
                          pp.particles[pos].Update(delta, time);
 

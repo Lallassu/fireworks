@@ -29,6 +29,10 @@ function ParticlePool() {
         this.particles[this.current].condition = prop.condition || function(p,d,t) {};
         this.particles[this.current].action = prop.action || function(p,d,t) {};
         this.particles[this.current].effect = prop.effect || function(p,d,t) {};
+
+        if (prop.onCreate != undefined) {
+            prop.onCreate(this.particles[this.current]);
+        }
     };
 }
 
