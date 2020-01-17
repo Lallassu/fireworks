@@ -1,23 +1,23 @@
 import * as THREE from "./../libs/three.module.js";
 
 function Particle() {
+    // Position in the buffergeo attr.
+    this.i = 0;
     this.x = 0;
     this.y = 0;
     this.z = 0;
-    this.i = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.vz = 0;
     this.mass = 0;
     this.alive = false;
     this.size = 0;
     this.color = 0;
-    this.decay = 0;
-    this.fx = 0;
-    this.fy = 0; 
-    this.fz = 0;
-    this.vx = 0;
-    this.vy = 0;
-    this.vz = 0;
+    this.decay = 0; 
     this.life = 0;
     this.gravity = -9.82;
+
+    // Function callbacks
     this.condition = 0;
     this.action = 0;
     this.effect = 0;
@@ -65,7 +65,7 @@ function Particle() {
 
         this.effect(this, dt, time);
 
-        if(this.life <= 0 || this.size <= 0 || this.y <= 0) {
+        if(this.life <= 0 || this.size <= 0) {
             this.Reset();
         }
     };

@@ -41,6 +41,8 @@
             import { ParticlePool } from './src/particlepool.js';
             import { Particle } from './src/particle.js';
             import { SoundHandler } from './src/soundhandler.js';
+            import { World } from './src/world.js';
+            import { Lights } from './src/lights.js';
 			import Stats from './libs/stats.module.js';
 
 			var renderer, scene, camera, stats;
@@ -53,8 +55,8 @@
             var invMaxFps = 1/60;
             var frameDelta = 0;
             var clock = new THREE.Clock();
-            var hlight = 0;
-            var plight = 0;
+            var world = new World();
+            var lights = new Lights();
 
 
 			init();
@@ -70,6 +72,9 @@
                 camera.add(sh.listener);
 
                 scene = new THREE.Scene();
+
+                world.Init(scene);
+                lights.Init(10, scene);
 
                 uniforms = {
                     pointTexture: { value: new THREE.TextureLoader().load( "textures/sprites/spark1.png" ) }
@@ -111,47 +116,6 @@
 
 				scene.add( particleSystem );
 
-                var cubegeo = new THREE.CubeGeometry( 500, 900, 5000 );
-                var matgeo = new THREE.MeshPhongMaterial( {color: 0x333333} );
-                var cube = new THREE.Mesh(cubegeo, matgeo);
-                cube.rotation.x= -Math.PI/2;
-                cube.position.y = -2500;
-                scene.add( cube );
-
-                for(var i = 0; i < 50; i++) {
-                    var size = 100+Math.random()*300;
-                    var cubegeo = new THREE.CubeGeometry( size, size, 3500 );
-                    var cube = new THREE.Mesh(cubegeo, matgeo);
-                    cube.rotation.x= -Math.PI/2;
-                    cube.position.x = -6000+Math.random()*12000;
-                    cube.position.z = -6000+Math.random()*12000;
-                    cube.position.y = -3000-Math.random()*1000;
-                    scene.add( cube );
-                }
-                
-               // var cubegeo = new THREE.MeshPhongMaterial( {color: 0x555588} );
-               // var cube = new THREE.Mesh(new THREE.CylinderGeometry(100, 100, 100, 100), cubegeo);
-               // cube.position.y = 50;
-               // scene.add(cube);
-
-                var texture = new THREE.TextureLoader().load( './mortar.png' );
-                var cylmat = new THREE.MeshPhongMaterial( {map: texture });
-                var cylgeo = new THREE.CylinderGeometry(10, 10, 30, 32, 32, true);
-                var cyl = new THREE.Mesh(cylgeo, cylmat);
-                cyl.position.y = 15;
-                scene.add(cyl);
-
-                var light = new THREE.AmbientLight( 0x404040 );
-                scene.add( light );
-                hlight = new THREE.HemisphereLight( 0xAA6677, 0xAACC22, 0.5);
-                console.log(hlight);
-                scene.add( hlight );
-
-          plight = new THREE.PointLight( 0x332200, 3, 100 );
-          plight.position.set( 0, 15, 0 );
-          scene.add( plight );
-
-                //scene.fog = new THREE.FogExp2( 0x333333, 0.0025 );
                 scene.background = new THREE.Color( 0x000000);
                 scene.fog = new THREE.FogExp2( 0x000000, 0.000185 );
 
@@ -183,7 +147,7 @@
                                     particle.vx += Math.sin(time*Math.random())/50;
                                },
                                x: 10-Math.random()*20,
-                               y: 10+Math.random()*5,
+                               y: 30+Math.random()*5,
                                z: 10-Math.random()*20,
                                mass: 0.002,
                                gravity: Math.random(),
@@ -201,7 +165,7 @@
                  pp.New({
                         onCreate: function(particle) {
                             sh.Play("up1", 1.0);
-                            plight.intensity = 20.0;
+                            lights.NewLight(new THREE.Vector3(0,30,0), new THREE.Color(0.7, 0.3, 0), 10.0);
                          },
                         effect: function(particle, dt, time) {
                             // Spin shell
@@ -221,9 +185,9 @@
                                decay: 50,
                             });
                         },
-                        x: 100-Math.random()*200,
-                        z: 100-Math.random()*200,
-                        y: 10,
+                        x: 0, //100-Math.random()*200,
+                        z: 0, //100-Math.random()*200,
+                        y: 1,
                         size: 100,
                         mass: 0.5,
                         vz: 0,
@@ -239,8 +203,8 @@
                         },
                         action: function(particle, dt, time) {
                             sh.Play("boom1", 1.0, false);
-                            hlight.intensity = 1.0;
-                            hlight.color.r = 1.0;
+                            lights.SetHemi(2.0, 1.0, 0.2, 0.2);
+
                             for (var i = 0; i < 300; i++) {
                                 pp.New({
                                    x: particle.x,
@@ -252,11 +216,11 @@
                                    vy: 0.5-Math.random(),
                                    vx: 0.5-Math.random(),
                                    vz: 0.5-Math.random(),
-                                   h: 1.0,
+                                   h: 0.5,
                                    s: 1.0,
                                    l: 1.0,
-                                   r: 1.0,
-                                   g: 1.0,
+                                   r: 0.0,
+                                   g: 0.0,
                                    b: 1.0,
                                    life: 0.1+Math.random()*2.5,
                                    decay: Math.random()*50,
@@ -332,18 +296,6 @@
 
                 while(frameDelta >= invMaxFps) {
 
-                      if(plight.intensity > 0) {
-                        plight.intensity -= 1;
-                      }
-
-                      if(hlight.intensity > 0.5) {
-                        hlight.intensity -= 0.1;
-                      } else {
-                        hlight.color.r = 0.66666;
-                        hlight.color.g = 0.4;
-                        hlight.color.b = 0.46666;
-                      }
-
 				     var sizes = geometry.attributes.size.array;
 				     var colors = geometry.attributes.color.array;
 				     var positions = geometry.attributes.position.array;
@@ -371,11 +323,9 @@
 			          geometry.attributes.position.needsUpdate = true;
 			          geometry.attributes.color.needsUpdate = true;
 
-                    //  camera.translateX(delta*100);
-                      //camera.position.x = 500 * Math.sin( THREE.Math.degToRad( time ) );
-                      //camera.position.y = 500 * Math.sin( THREE.Math.degToRad( time ) );
-                      //camera.position.z = 900 * Math.cos( THREE.Math.degToRad( time ) );
-                      //camera.lookAt( scene.position );
+                      world.Update(delta, time);
+                      lights.Update(delta, time);
+
                       frameDelta -= invMaxFps;
                 }
 
