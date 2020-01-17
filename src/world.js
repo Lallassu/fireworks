@@ -1,9 +1,10 @@
 import * as THREE from "./../libs/three.module.js";
 
 function World() {
+    this.mortars = [];
 
     World.prototype.Init = function(scene) {
-        var cubegeo = new THREE.CubeGeometry( 500, 900, 5000 );
+        var cubegeo = new THREE.CubeGeometry( 500, 1000, 5000 );
         var matgeo = new THREE.MeshPhongMaterial( {color: 0x333333} );
         var cube = new THREE.Mesh(cubegeo, matgeo);
         cube.rotation.x= -Math.PI/2;
@@ -21,23 +22,28 @@ function World() {
             scene.add( cube );
         }
 
-        // var cubegeo = new THREE.MeshPhongMaterial( {color: 0x555588} );
-        // var cube = new THREE.Mesh(new THREE.CylinderGeometry(100, 100, 100, 100), cubegeo);
-        // cube.position.y = 50;
-        // scene.add(cube);
+        for(var i = 0; i < 10; i++) {
+            var x = 240-Math.random()*450;
+            var z = 450-Math.random()*950;
+            var texture = new THREE.TextureLoader().load( './mortar.png' );
+            var cylmat = new THREE.MeshPhongMaterial( {map: texture });
+            var cylgeo = new THREE.CylinderGeometry(10, 10, 30, 32, 32, true);
+            var cyl = new THREE.Mesh(cylgeo, cylmat);
+            cyl.position.y = 15;
+            cyl.position.x = x-5;
+            cyl.position.z = z-5;
+            scene.add(cyl);
+            this.mortars.push(cyl.position);
+        }
+    };
 
-        var texture = new THREE.TextureLoader().load( './mortar.png' );
-        var cylmat = new THREE.MeshPhongMaterial( {map: texture });
-        var cylgeo = new THREE.CylinderGeometry(10, 10, 30, 32, 32, true);
-        var cyl = new THREE.Mesh(cylgeo, cylmat);
-        cyl.position.y = 15;
-        cyl.position.x = -5;
-        cyl.position.z = -5;
-        scene.add(cyl);
+    World.prototype.GetLaunchPosition = function() {
+        var i = Math.random()*this.mortars.length |0;
+        return this.mortars[i];
     };
 
     World.prototype.Update = function(dt, time) {
 
-    }
+    };
 }
 export {World}

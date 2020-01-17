@@ -139,6 +139,7 @@
 
 			}
             function onClick() {
+                 var pos = world.GetLaunchPosition();
                  // Smoke
                  for (var i = 0; i < 100; i++) {
                             pp.New({
@@ -146,9 +147,9 @@
                                     particle.vz += Math.sin(time*Math.random())/50;
                                     particle.vx += Math.sin(time*Math.random())/50;
                                },
-                               x: 10-Math.random()*20,
-                               y: 30+Math.random()*5,
-                               z: 10-Math.random()*20,
+                               x: pos.x + 10-Math.random()*20,
+                               y: pos.y + 30 +Math.random()*5,
+                               z: pos.z + 10-Math.random()*20,
                                mass: 0.002,
                                gravity: Math.random(),
                                size: 20+Math.random()*100,
@@ -165,7 +166,7 @@
                  pp.New({
                         onCreate: function(particle) {
                             sh.Play("up1", 1.0);
-                            lights.NewLight(new THREE.Vector3(0,30,0), new THREE.Color(0.7, 0.3, 0), 10.0);
+                            lights.NewLight(new THREE.Vector3(pos.x,30,pos.z), new THREE.Color(0.7, 0.3, 0), 10.0);
                          },
                         effect: function(particle, dt, time) {
                             // Spin shell
@@ -185,9 +186,9 @@
                                decay: 50,
                             });
                         },
-                        x: 0, //100-Math.random()*200,
-                        z: 0, //100-Math.random()*200,
-                        y: 1,
+                        x: pos.x,
+                        z: pos.z,
+                        y: pos.y,
                         size: 100,
                         mass: 0.5,
                         vz: 0,
@@ -323,7 +324,7 @@
 			          geometry.attributes.position.needsUpdate = true;
 			          geometry.attributes.color.needsUpdate = true;
 
-                      world.Update(delta, time);
+                      //world.Update(delta, time);
                       lights.Update(delta, time);
 
                       frameDelta -= invMaxFps;
