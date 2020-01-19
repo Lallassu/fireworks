@@ -22,6 +22,9 @@ function SoundHandler() {
         this.audioLoader.load( 'sounds/boom4.mp3', function(buffer) {
             self.sounds["boom4"] = buffer;
         });
+        this.audioLoader.load( 'sounds/boom4.mp3', function(buffer) {
+            self.sounds["boom5"] = buffer;
+        });
         this.audioLoader.load( 'sounds/up1.mp3', function(buffer) {
             self.sounds["up1"] = buffer;
         });
