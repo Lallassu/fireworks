@@ -33,7 +33,7 @@ function Particle() {
 
         var Cd = 0.47; // Dimensionless
         var rho = 1.22; // kg / m^3
-        var A = Math.PI * 2 * 2 / (10000);
+        var A = Math.PI / (10000);
         var Fx = -0.5 * Cd * A * rho * this.vx * this.vx * this.vx / Math.abs(this.vx);
         var Fz = -0.5 * Cd * A * rho * this.vz * this.vz * this.vz / Math.abs(this.vz);
         var Fy = -0.5 * Cd * A * rho * this.vy * this.vy * this.vy / Math.abs(this.vy);

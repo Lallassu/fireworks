@@ -1,10 +1,7 @@
-- vr support
-
-- Fireworks.js -> fireworks specifications
-    - färdiga effekter + shells som egna funktioner som man kan kombinera.
-     -> Smoke
-     -> Sparks
-     -> random create function 
-     -> random effect function 
-     -> random explode function
-        etc...
+- vr support (threejs dev for far support in stereocam)
+- Multiple colors per bomb.
+- Small colored bombs as second stage 
+- Heavy sound for larger bombs and less for small.
+- More flair effects
+- Round bombs
+- Circle bombs with powerful middle effect

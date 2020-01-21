@@ -178,13 +178,16 @@
 				stats.update();
 			}
 
+          var shoot = 0;
 			function render() {
 				var time = Date.now() * 0.005;
                 var delta = clock.getDelta();
                 frameDelta += delta;
                 
-                if(Math.random() < 0.01) {
+                shoot += delta;
+                if(shoot > 2) {
                     ff.FireRandom();
+                    shoot = 0;
                 }
 
                 while(frameDelta >= invMaxFps) {
@@ -216,11 +219,11 @@
 			          geometry.attributes.position.needsUpdate = true;
 			          geometry.attributes.color.needsUpdate = true;
 
-                      camera.position.x = radius * Math.cos( angle );  
-                      camera.position.z = radius * Math.sin( angle );
-                      camera.position.y = 3000;
-                       angle += 0.001;
-                       camera.lookAt(new THREE.Vector3(0,0,0));
+                     // camera.position.x = radius * Math.cos( angle );  
+                     // camera.position.z = radius * Math.sin( angle );
+                     // camera.position.y = 3000;
+                     //  angle += 0.001;
+                     //  camera.lookAt(new THREE.Vector3(0,0,0));
                       //world.Update(delta, time);
                       lights.Update(delta, time);
 
