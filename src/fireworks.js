@@ -7,6 +7,7 @@ function Fireworks() {
     this.shellEffect = 0;
     this.explodeEffect = 0;
     this.crackleEffect = 0;
+    this.maxSize = 10;
 
     Fireworks.prototype.FireRandom = function() {
         this.bomb();
@@ -51,25 +52,57 @@ function Fireworks() {
         // Shell effects are effects for the shell itself while
         // in the air.
         this.shellEffect = function(particle, dt, time, seed) {
-            pp.New({
-                   x: particle.x,
-                   y: particle.y,
-                   z: particle.z,
-                   mass: 0.002,
-                   gravity: -0.2,
-                   size: 20+Math.random()*40,
-                   r: 1.0,
-                   g: 0,
-                   b: 0,
-                   h: 1.0,
-                   s: 0.5,
-                   l: 0.0,
-                   life: Math.random()*3,
-                   decay: 50,
-            });
+            var max = 1;
+            var vx = 0;
+            var vz = 0;
+            switch(seed) {
+            case 1:
+                max = Math.random()*30;
+                break;
+            case 2:
+                particle.x += Math.cos(Math.PI*2*time)*Math.random()*3;
+                particle.z += Math.sin(Math.PI*2*time)*Math.random()*3;
+                break;
+            case 3:
+                if(Math.random() > 0.5) {
+                    particle.size = 150;
+                } else {
+                    particle.size = 10;
+                }
+                max = Math.random()*10;
+                vx = 2-Math.random()*4;
+                vz = 2-Math.random()*4;
+                break;
+            }
+            for(var i = 0; i < max; i++) {
+                pp.New({
+                       x: particle.x,
+                       y: particle.y,
+                       z: particle.z,
+                       mass: 0.002,
+                       gravity: -0.2,
+                       size: 20+Math.random()*40,
+                       vx: vx,
+                       vz: vz,
+                       r: 1.0,
+                       g: 0,
+                       b: 0,
+                       h: 1.0,
+                       s: 0.5,
+                       l: 0.0,
+                       life: Math.random()*3,
+                       decay: 50,
+                });
+            }
         };
 
-        this.crackleEffect = function(particle, dt, time, seed) {
+        this.crackleEffect = function(particle, dt, time, seed, color) {
+            var r = 0;
+            var g = 0;
+            var b = 0;
+            var h = 1.0;
+            var s = 1.0;
+            var l = 1.0;
             switch(seed) {
             case 1:
                 if(Math.random() < 0.2) {
@@ -85,22 +118,42 @@ function Fireworks() {
                 if(Math.random() < 0.2) {
                     sh.PlayRandomHeavyBoom(0.1);
                 }
+                r = color.r*2;
+                g = color.g*2;
+                b = color.b;
+                h = Math.random();
+                s = Math.random();
+                l = Math.random();
                 break;
             }
             for (var i = 0; i < 10+Math.random()*150; i++) {
-                var size = Math.random()*100;
+                var size = Math.random()*80;
                 var gravity = -0.2;
                 var vy = 1-Math.random()*2;
                 var vx = 1-Math.random()*2;
                 var vz = 1-Math.random()*2;
                 var life = 0.1+Math.random()*2;
+                if (Math.random()> 0.5 && seed == 2) {
+                    r = color.r;
+                    g = color.g;
+                    b = color.b;
+                    h = Math.random();
+                    s = Math.random();
+                    l = Math.random();
+                }
                 pp.New({
                        x: particle.x,
                        y: particle.y,
                        z: particle.z,
                        size: size,
-                       mass: 0.2,
+                       mass: 0.02,
                        gravity: gravity,
+                       r: r,
+                       g: g,
+                       b: b,
+                       h: h,
+                       s: s,
+                       l: l,
                        vy: vy,
                        vx: vx,
                        vz: vz,
@@ -153,6 +206,12 @@ function Fireworks() {
                 }
                 break;
             case 2:
+                if(particle.vy < 0) {
+                    particle.x += Math.cos(Math.PI*2*time)*Math.random()*3;
+                    particle.z += Math.sin(Math.PI*2*time)*Math.random()*3;
+                }
+                break;
+            case 3:
                 if(Math.random() > 0.5) {
                     particle.size = 150;
                 } else {
@@ -168,7 +227,7 @@ function Fireworks() {
 
             if(size > 250 && particle.life < 1.0) {
                 if(Math.random() < 0.05) {
-                    this.crackleEffect(particle, dt, time, seed);
+                    this.crackleEffect(particle, dt, time, seed, color);
                     particle.Reset();
                 }
             }
@@ -197,13 +256,15 @@ function Fireworks() {
             // Random mortar effect
             self.mortarEffect(pos);
 
-            var seed = Math.random()*5 |0;
+            var seed = Math.random()*4 |0;
 
             // Colors of the bomb effect
             var color = new THREE.Color(Math.random(), Math.random(), Math.random());
 
-            // Generate sie of bomb
-            var size = 20+Math.random()*300;
+
+            // Generate size of bomb
+            var size = 20+Math.random()*Math.min(350, self.maxSize);
+            self.maxSize += 20;
 
             pp.New({
                    effect: function(particle, dt, time) {
@@ -223,7 +284,7 @@ function Fireworks() {
                    r: color.r,
                    g: color.g,
                    b: color.b,
-                   life: 5+Math.random()*5,
+                   life: 20,
                    decay: 10+Math.random()*20,
                    condition: function(particle, dt, time) {
                        return particle.vy <= -Math.random()*20? true:false;
@@ -249,7 +310,7 @@ function Fireworks() {
                        var maxLife = 1+Math.random()*6;
 
                        var radius = 50+Math.random()*50;
-                       var speed = 2+Math.random()*3;
+                       var speed = 2+Math.random()*2;
                        var offset = 2/size;
                        var inc = Math.PI*(3.0 - Math.sqrt(5.0));
                        for (var i = 0; i < size; i++) {
@@ -267,9 +328,9 @@ function Fireworks() {
                                vz *= speed;
                                break;
                            case 2:
-                               vx = 2-Math.random()*4;
-                               vy = 2-Math.random()*4;
-                               vz = 2-Math.random()*4;
+                               vy = 1+Math.random()*2;
+                               vx = Math.sin(i*Math.PI*2*speed)*(2-Math.random()*4);
+                               vz = Math.sin(i*Math.PI*2*speed)*(2-Math.random()*4);
                                break;
                            default:
                                vy = ((i * offset) - 1) + (offset / 2);

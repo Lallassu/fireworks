@@ -64,7 +64,8 @@
             var user = new THREE.Object3D();
             var angle = 0;
             var radius = 2000;
-
+            var controller = 0;
+            var controller2 = 0;
 
 			init();
 			animate();
@@ -147,21 +148,39 @@
                 window.addEventListener('click', onClick, true);
 
                 // VR
-                //scene.add(user);
-                //user.add(camera);
-                //user.position.x = -500;
-                //user.position.y = 850;
-                //user.position.z = 50; 
-                //user.lookAt(new THREE.Vector3(0,0,0));
+          controller = renderer.xr.getController( 0 );
+          controller.addEventListener( 'selectstart', onSelectStart );
+          controller.addEventListener( 'selectend', onSelectEnd );
+          controller2 = renderer.xr.getController( 1 );
+          controller2.addEventListener( 'selectstart', onSelectStart );
+          controller2.addEventListener( 'selectend', onSelectEnd );
+                scene.add(user);
+                user.add(camera);
+                user.position.x = 1500;
+                user.position.y = 1400;
+                user.position.z = 1500; 
+                user.lookAt(new THREE.Vector3(0,0,0));
 
-                //document.body.appendChild( VRButton.createButton( renderer ) );
-                //renderer.xr.enabled = true;
-                //renderer.setAnimationLoop( function () {
-                //    render();
-                //    stats.update();
-                //} );
+                document.body.appendChild( VRButton.createButton( renderer ) );
+                renderer.xr.enabled = true;
+                renderer.setAnimationLoop( function () {
+                    render();
+                    stats.update();
+                } );
 
 			}
+          
+				function onSelectStart() {
+
+					this.userData.isSelecting = true;
+
+				}
+
+				function onSelectEnd() {
+
+					this.userData.isSelecting = false;
+
+				}
             function onClick() {
                 ff.FireRandom();
             }
@@ -185,7 +204,11 @@
                 frameDelta += delta;
                 
                 shoot += delta;
-                if(shoot > 2) {
+                if((shoot > 3 ||
+                controller.userData.isSelecting === true ||
+                controller2.userData.isSelecting === true) &&
+                shoot > 0.5
+                ) {
                     ff.FireRandom();
                     shoot = 0;
                 }
@@ -202,7 +225,7 @@
                             continue;
                         }
 
-                         pp.particles[pos].Update(delta, time);
+                         pp.particles[pos].Update(frameDelta, time);
 
                          positions[i] = pp.particles[pos].x;
                          positions[i+1] = pp.particles[pos].y;
@@ -219,13 +242,15 @@
 			          geometry.attributes.position.needsUpdate = true;
 			          geometry.attributes.color.needsUpdate = true;
 
-                     // camera.position.x = radius * Math.cos( angle );  
-                     // camera.position.z = radius * Math.sin( angle );
-                     // camera.position.y = 3000;
-                     //  angle += 0.001;
-                     //  camera.lookAt(new THREE.Vector3(0,0,0));
-                      //world.Update(delta, time);
-                      lights.Update(delta, time);
+                      camera.position.x = radius * Math.cos( angle );  
+                      camera.position.z = radius * Math.sin( angle );
+                      camera.position.y = 3400;
+                     // user.position.x = radius * Math.cos( angle );  
+                     // user.position.z = radius * Math.sin( angle );
+                     // user.position.y = 3400;
+                     //  angle += 0.0001;
+                       camera.lookAt(new THREE.Vector3(0,0,0));
+                      lights.Update(frameDelta, time);
 
                       frameDelta -= invMaxFps;
                 }
